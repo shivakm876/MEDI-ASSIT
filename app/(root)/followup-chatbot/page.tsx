@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Send } from "lucide-react"
+import { Send, Trash2 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import ReactMarkdown from "react-markdown"
 import { Components } from "react-markdown"
@@ -128,6 +128,13 @@ export default function FollowupChatbotPage() {
     }
   }
 
+  const handleClearChat = () => {
+    setMessages([GREETING_MESSAGE])
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('chatMessages')
+    }
+  }
+
   const markdownComponents: Components = {
     h1: ({ children }) => <h1 className="text-xl font-bold mb-2">{children}</h1>,
     h2: ({ children }) => <h2 className="text-lg font-semibold mb-2">{children}</h2>,
@@ -146,8 +153,17 @@ export default function FollowupChatbotPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <Card className="max-w-4xl mx-auto">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Medical Assistant Chat</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClearChat}
+            className="flex items-center gap-2"
+          >
+            <Trash2 className="h-4 w-4" />
+            Clear Chat
+          </Button>
         </CardHeader>
         <CardContent>
           <div

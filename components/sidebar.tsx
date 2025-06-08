@@ -27,7 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LayoutDashboard, Stethoscope, History, User, Settings, LogOut, ChevronUp, MessageCircle, BookOpen, X } from "lucide-react"
+import { LayoutDashboard, Stethoscope, History, User, Settings, LogOut, ChevronUp, MessageCircle, BookOpen, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export default function AppSidebar() {
@@ -64,6 +64,11 @@ export default function AppSidebar() {
           title: "Medical Search",
           url: "/book-chatbot",
           icon: BookOpen,
+        },
+        {
+          title: "Find Doctors",
+          url: "/find-doctors",
+          icon: Search,
         },
       ],
     },
