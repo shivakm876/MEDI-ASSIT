@@ -74,6 +74,11 @@ export default function AppSidebar() {
           url: "/find-doctors",
           icon: Search,
         },
+        {
+          title: "Disease Info",
+          url: "/disease-info",
+          icon: BookOpen,
+        },
       ],
     },
     {
