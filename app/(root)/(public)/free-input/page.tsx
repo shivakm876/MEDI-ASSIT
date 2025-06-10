@@ -148,14 +148,15 @@ const symptoms = [
 interface SymptomData {
   symptoms: string[]
   timestamp: number
-  analysis: {
-    disease: string
+  predictions: {
+    diseaseName: string
+    probability: number
     description: string
     precautions: string[]
     medications: string[]
-    workout: string[]
-    diet: string[]
-  }
+    workouts: string[]
+    diets: string[]
+  }[]
 }
 
 export default function FreeSymptomInput() {
@@ -206,14 +207,7 @@ export default function FreeSymptomInput() {
       const data: SymptomData = {
         symptoms: selectedSymptoms,
         timestamp: Date.now(),
-        analysis: {
-          disease: analysisData.disease || "Unknown Disease",
-          description: analysisData.description || "No description available",
-          precautions: Array.isArray(analysisData.precautions) ? analysisData.precautions : [],
-          medications: Array.isArray(analysisData.medications) ? analysisData.medications : [],
-          workout: Array.isArray(analysisData.workout) ? analysisData.workout : [],
-          diet: Array.isArray(analysisData.diet) ? analysisData.diet : []
-        }
+        predictions: analysisData.predictions || []
       }
 
       setAnalysis(data)
@@ -301,111 +295,67 @@ export default function FreeSymptomInput() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Tabs defaultValue="disease" className="w-full">
-              <TabsList className="grid w-full grid-cols-5">
-                <TabsTrigger value="disease">Disease</TabsTrigger>
-                <TabsTrigger value="precautions">Precautions</TabsTrigger>
-                <TabsTrigger value="medications">Medications</TabsTrigger>
-                <TabsTrigger value="workouts">Workouts</TabsTrigger>
-                <TabsTrigger value="diets">Diets</TabsTrigger>
-              </TabsList>
+            {analysis.predictions.map((prediction, index) => (
+              <Card key={index} className="mb-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-blue-500" />
+                    {prediction.diseaseName} ({prediction.probability.toFixed(1)}% probability)
+                  </CardTitle>
+                  <CardDescription>{prediction.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Tabs defaultValue="precautions" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4">
+                      <TabsTrigger value="precautions">Precautions</TabsTrigger>
+                      <TabsTrigger value="medications">Medications</TabsTrigger>
+                      <TabsTrigger value="workouts">Workouts</TabsTrigger>
+                      <TabsTrigger value="diets">Diets</TabsTrigger>
+                    </TabsList>
 
-              <TabsContent value="disease" className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Info className="h-5 w-5 text-blue-500" />
-                      {analysis.analysis.disease}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      {analysis.analysis.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    <TabsContent value="precautions">
+                      <ul className="list-disc list-inside space-y-2">
+                        {prediction.precautions.map((precaution, idx) => (
+                          <li key={idx} className="text-muted-foreground">
+                            {precaution}
+                          </li>
+                        ))}
+                      </ul>
+                    </TabsContent>
 
-              <TabsContent value="precautions">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="h-5 w-5 text-green-500" />
-                      Precautions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc list-inside space-y-2">
-                      {analysis.analysis.precautions.map((precaution, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {precaution}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    <TabsContent value="medications">
+                      <ul className="list-disc list-inside space-y-2">
+                        {prediction.medications.map((medication, idx) => (
+                          <li key={idx} className="text-muted-foreground">
+                            {medication}
+                          </li>
+                        ))}
+                      </ul>
+                    </TabsContent>
 
-              <TabsContent value="medications">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Pill className="h-5 w-5 text-purple-500" />
-                      Medications
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc list-inside space-y-2">
-                      {analysis.analysis.medications.map((medication, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {medication}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+                    <TabsContent value="workouts">
+                      <ul className="list-disc list-inside space-y-2">
+                        {prediction.workouts.map((workout, idx) => (
+                          <li key={idx} className="text-muted-foreground">
+                            {workout}
+                          </li>
+                        ))}
+                      </ul>
+                    </TabsContent>
 
-              <TabsContent value="workouts">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Dumbbell className="h-5 w-5 text-orange-500" />
-                      Workouts
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc list-inside space-y-2">
-                      {analysis.analysis.workout.map((workout, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {workout}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="diets">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Utensils className="h-5 w-5 text-red-500" />
-                      Diets
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="list-disc list-inside space-y-2">
-                      {analysis.analysis.diet.map((diet, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {diet}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                    <TabsContent value="diets">
+                      <ul className="list-disc list-inside space-y-2">
+                        {prediction.diets.map((diet, idx) => (
+                          <li key={idx} className="text-muted-foreground">
+                            {diet}
+                          </li>
+                        ))}
+                      </ul>
+                    </TabsContent>
+                  </Tabs>
+                </CardContent>
+              </Card>
+            ))}
           </motion.div>
         )}
       </motion.div>

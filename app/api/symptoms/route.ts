@@ -83,20 +83,24 @@ export async function POST(request: Request) {
       data: {
         userId: session.user.id,
         symptoms,
-        disease: analysis.disease,
-        description: analysis.description,
-        precautions: analysis.precautions,
-        medications: analysis.medications,
-        workouts: analysis.workouts,
-        diets: analysis.diets,
+        predictions: {
+          create: {
+            diseaseName: analysis.disease,
+            probability: 100,
+            description: analysis.description,
+            precautions: analysis.precautions,
+            medications: analysis.medications,
+            workouts: analysis.workouts,
+            diets: analysis.diets,
+          }
+        }
       },
+      include: {
+        predictions: true
+      }
     })
 
-    return NextResponse.json({
-      id: symptomEntry.id,
-      ...analysis,
-      symptoms,
-    })
+    return NextResponse.json(symptomEntry)
   } catch (error) {
     console.error("Symptom analysis error:", error)
     return NextResponse.json({ error: "Failed to process symptoms" }, { status: 500 })
@@ -113,6 +117,13 @@ export async function GET() {
     const symptoms = await prisma.symptomEntry.findMany({
       where: {
         userId: session.user.id,
+      },
+      include: {
+        predictions: {
+          orderBy: {
+            probability: 'desc'
+          }
+        }
       },
       orderBy: {
         createdAt: "desc",

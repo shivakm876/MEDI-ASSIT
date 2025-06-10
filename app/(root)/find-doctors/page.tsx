@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from "@/lib/auth-context"
+import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
@@ -151,99 +152,149 @@ export default function FindDoctorsPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Find Doctors Near You</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Location Status */}
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              {location ? (
-                <span>Location: {location.lat.toFixed(4)}, {location.lon.toFixed(4)}</span>
-              ) : (
-                <span>Getting your location...</span>
-              )}
-            </div>
+    <div className="container mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto"
+      >
+        <Card>
+          <CardHeader>
+            <CardTitle>Find Doctors Near You</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-2"
+                >
+                  <label className="text-sm font-medium">Specialty</label>
+                  <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a specialty" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {specialties.map((specialty) => (
+                        <SelectItem key={specialty.name} value={specialty.name}>
+                          {specialty.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </motion.div>
 
-            {/* Search Controls */}
-            <div className="grid gap-4 md:grid-cols-3">
-              <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select specialty" />
-                </SelectTrigger>
-                <SelectContent>
-                  {specialties.map((specialty) => (
-                    <SelectItem key={specialty.name} value={specialty.name}>
-                      {specialty.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="space-y-2"
+                >
+                  <label className="text-sm font-medium">Search Radius (meters)</label>
+                  <Slider
+                    value={[radius]}
+                    onValueChange={(value) => setRadius(value[0])}
+                    min={1000}
+                    max={10000}
+                    step={1000}
+                  />
+                  <p className="text-sm text-muted-foreground">{radius} meters</p>
+                </motion.div>
 
-              <div className="space-y-2">
-                <label>Search Radius (meters)</label>
-                <Slider
-                  value={[radius]}
-                  onValueChange={([value]) => setRadius(value)}
-                  min={1000}
-                  max={5000}
-                  step={1000}
-                />
-                <span>{radius / 1000} km</span>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="space-y-2"
+                >
+                  <label className="text-sm font-medium">Your Location</label>
+                  <div className="p-3 bg-muted rounded-lg">
+                    {location ? (
+                      <p className="text-sm">
+                        Latitude: {location.lat.toFixed(6)}, Longitude: {location.lon.toFixed(6)}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        {error || "Getting your location..."}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-2"
+                >
+                  <label className="text-sm font-medium">Number of Results</label>
+                  <Slider
+                    value={[limit]}
+                    onValueChange={(value) => setLimit(value[0])}
+                    min={5}
+                    max={20}
+                    step={5}
+                  />
+                  <p className="text-sm text-muted-foreground">{limit} results</p>
+                </motion.div>
               </div>
 
-              <div className="space-y-2">
-                <label>Results Limit</label>
-                <Select value={limit.toString()} onValueChange={(value) => setLimit(Number(value))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select limit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {[5, 10, 15, 20].map((value) => (
-                      <SelectItem key={value} value={value.toString()}>
-                        {value} results
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Button
+                  onClick={searchDoctors}
+                  disabled={!location || !selectedSpecialty || loading}
+                  className="w-full"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Searching...
+                    </>
+                  ) : (
+                    <>
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Find Doctors
+                    </>
+                  )}
+                </Button>
+              </motion.div>
 
-            <Button 
-              onClick={searchDoctors} 
-              disabled={!location || !selectedSpecialty || loading}
-              className="w-full"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Searching...
-                </>
-              ) : (
-                "Search Doctors"
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm text-red-500"
+                >
+                  {error}
+                </motion.div>
               )}
-            </Button>
 
-            {/* Error Message */}
-            {error && (
-              <div className="text-red-500 text-sm">{error}</div>
-            )}
-
-            {/* Results */}
-            {results.length > 0 && (
-              <div className="space-y-4 mt-6">
-                <h3 className="text-lg font-semibold">Found {results.length} doctors</h3>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {results.map((result) => (
-                    <Card key={result.id}>
-                      <CardContent className="pt-6">
-                        <h4 className="font-semibold">{result.poi.name}</h4>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {result.address.freeformAddress}
-                        </p>
+              <AnimatePresence>
+                {results.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="space-y-4"
+                  >
+                    <h3 className="text-lg font-semibold">Results</h3>
+                    {results.map((result, index) => (
+                      <motion.div
+                        key={result.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="p-4 border rounded-lg"
+                      >
+                        <h4 className="font-medium">{result.poi.name}</h4>
+                        <p className="text-sm text-muted-foreground">{result.address.freeformAddress}</p>
                         {(result.poi.phone || result.poi.phones?.length) && (
                           <div className="mt-2 space-y-1">
                             <p className="text-sm font-medium">Contact:</p>
@@ -266,18 +317,30 @@ export default function FindDoctorsPage() {
                             ))}
                           </div>
                         )}
-                        <p className="text-sm mt-2">
+                        <p className="text-sm text-muted-foreground">
                           Distance: {(result.dist / 1000).toFixed(1)} km
                         </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="mt-2"
+                          onClick={() => {
+                            const url = `https://www.google.com/maps/search/?api=1&query=${result.position.lat},${result.position.lon}`;
+                            window.open(url, '_blank');
+                          }}
+                        >
+                          <MapPin className="mr-2 h-4 w-4" />
+                          View in Map
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   )
 } 

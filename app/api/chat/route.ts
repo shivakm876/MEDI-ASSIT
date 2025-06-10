@@ -22,13 +22,16 @@ export async function POST(req: Request) {
       recentSymptoms.forEach((entry: any) => {
         medicalContext += `
 Date: ${new Date(entry.createdAt).toLocaleDateString()}
-Disease: ${entry.disease}
 Symptoms: ${entry.symptoms.join(", ")}
-Description: ${entry.description}
-Precautions: ${entry.precautions.join(", ")}
-Medications: ${entry.medications.join(", ")}
-Workouts: ${entry.workouts.join(", ")}
-Diets: ${entry.diets.join(", ")}
+Predictions:
+${entry.predictions.map((pred: any) => `
+- ${pred.diseaseName} (${pred.probability.toFixed(1)}% probability)
+  Description: ${pred.description}
+  Precautions: ${pred.precautions.join(", ")}
+  Medications: ${pred.medications.join(", ")}
+  Workouts: ${pred.workouts.join(", ")}
+  Diets: ${pred.diets.join(", ")}
+`).join("\n")}
 ---\n`;
       });
     } else {
@@ -59,18 +62,11 @@ Tone Instructions:
     const response = await result.response;
     const text = response.text();
 
-    // Return the complete history including the new messages
-    return NextResponse.json({ 
-      message: text,
-      history: [
-        ...(history || []),
-        { role: "user", parts: [{ text: message }] },
-        { role: "model", parts: [{ text }] }
-      ]
+    return NextResponse.json({
+      history: [...history, { role: "user", parts: [{ text: message }] }, { role: "model", parts: [{ text }] }]
     });
-
   } catch (error) {
-    console.error("Chat API Error:", error);
+    console.error("Chat error:", error);
     return NextResponse.json(
       { error: "Failed to process chat message" },
       { status: 500 }

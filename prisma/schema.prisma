@@ -82,16 +82,27 @@ model SymptomEntry {
   id             String   @id @default(cuid())
   userId         String
   symptoms       String[] // Array of symptom names
-
-  disease        String   // Predicted disease
-  description    String   // Disease description
-  precautions    String[] // Array of precautions
-  medications    String[] // Array of medications
-  workouts       String[] // Array of workout recommendations
-  diets          String[] // Array of diet recommendations
-  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  predictions    DiseasePrediction[] // Relation to disease predictions
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model DiseasePrediction {
+  id              String   @id @default(cuid())
+  symptomEntryId  String
+  diseaseName     String
+  probability     Float    // Probability percentage
+  description     String   // Disease description
+  precautions     String[] // Array of precautions
+  medications     String[] // Array of medications
+  workouts        String[] // Array of workout recommendations
+  diets           String[] // Array of diet recommendations
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  symptomEntry    SymptomEntry @relation(fields: [symptomEntryId], references: [id], onDelete: Cascade)
+
+  @@unique([symptomEntryId, diseaseName])
 }

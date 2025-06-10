@@ -25,17 +25,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-interface SymptomEntry {
+interface DiseasePrediction {
   id: string
-  symptoms: string[]
-  disease: string
-  confidence: number
-  createdAt: string
+  diseaseName: string
+  probability: number
+  description: string
   precautions: string[]
   medications: string[]
   workouts: string[]
   diets: string[]
-  description: string
+}
+
+interface SymptomEntry {
+  id: string
+  symptoms: string[]
+  createdAt: string
+  predictions: DiseasePrediction[]
 }
 
 export default function SymptomHistoryPage() {
@@ -106,8 +111,8 @@ export default function SymptomHistoryPage() {
             
             <div class="section">
               <h3>Diagnosis</h3>
-              <p><strong>${entry.disease}</strong></p>
-              <p>${entry.description}</p>
+              <p><strong>${entry.predictions[0]?.diseaseName || "Unknown Condition"}</strong></p>
+              <p>${entry.predictions[0]?.description || "No description available"}</p>
             </div>
 
             <div class="grid">
@@ -126,28 +131,28 @@ export default function SymptomHistoryPage() {
             <div class="section">
               <h3>Precautions</h3>
               <ul>
-                ${entry.precautions.map((precaution) => `<li>${precaution}</li>`).join("")}
+                ${entry.predictions[0]?.precautions.map((precaution) => `<li>${precaution}</li>`).join("")}
               </ul>
             </div>
 
             <div class="section">
               <h3>Medications</h3>
               <ul>
-                ${entry.medications.map((medication) => `<li>${medication}</li>`).join("")}
+                ${entry.predictions[0]?.medications.map((medication) => `<li>${medication}</li>`).join("")}
               </ul>
             </div>
 
             <div class="section">
               <h3>Diet Recommendations</h3>
               <ul>
-                ${entry.diets.map((diet) => `<li>${diet}</li>`).join("")}
+                ${entry.predictions[0]?.diets.map((diet) => `<li>${diet}</li>`).join("")}
               </ul>
             </div>
 
             <div class="section">
               <h3>Exercise Recommendations</h3>
               <ul>
-                ${entry.workouts.map((workout) => `<li>${workout}</li>`).join("")}
+                ${entry.predictions[0]?.workouts.map((workout) => `<li>${workout}</li>`).join("")}
               </ul>
             </div>
 
@@ -233,6 +238,84 @@ export default function SymptomHistoryPage() {
 
   const chartData = generateChartData()
 
+  const renderSymptomCard = (entry: SymptomEntry) => {
+    const topPrediction = entry.predictions[0]
+    
+    return (
+      <Card key={entry.id} className="glass-card border-0">
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div>
+              <CardTitle className="text-xl">
+                {topPrediction?.diseaseName || "Unknown Condition"}
+              </CardTitle>
+              <CardDescription>
+                <div className="flex items-center gap-2 mt-1">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    {new Date(entry.createdAt).toLocaleDateString()}
+                  </span>
+                  <Clock className="h-4 w-4 ml-2" />
+                  <span>
+                    {new Date(entry.createdAt).toLocaleTimeString()}
+                  </span>
+                </div>
+              </CardDescription>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setEntryToDelete(entry)
+                  setDeleteDialogOpen(true)
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link href={`/symptoms/${entry.id}`}>
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">Symptoms</h4>
+              <div className="flex flex-wrap gap-2">
+                {entry.symptoms.map((symptom, index) => (
+                  <Badge key={index} variant="secondary">
+                    {symptom}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h4 className="font-medium mb-2">Top Predictions</h4>
+              <div className="space-y-2">
+                {entry.predictions.slice(0, 3).map((prediction) => (
+                  <div
+                    key={prediction.id}
+                    className="flex justify-between items-center p-2 bg-white/50 rounded"
+                  >
+                    <span className="font-medium">{prediction.diseaseName}</span>
+                    <span className="text-blue-600">
+                      {prediction.probability.toFixed(1)}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   if (loading) {
     return (
       <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -298,69 +381,7 @@ export default function SymptomHistoryPage() {
                   </CardContent>
                 </Card>
               ) : (
-                symptomHistory.map((entry) => (
-                  <Card key={entry.id} className="glass-card glass-card-hover overflow-hidden">
-                    <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row">
-                        <div className="bg-slate-100 dark:bg-slate-800 p-4 md:w-48 flex flex-row md:flex-col justify-between md:justify-start gap-4">
-                          <div>
-                            <div className="flex items-center text-slate-500 dark:text-slate-400 mb-1">
-                              <Calendar className="h-4 w-4 mr-1" />
-                              <span className="text-sm">{new Date(entry.createdAt).toLocaleDateString()}</span>
-                            </div>
-                            <div className="flex items-center text-slate-500 dark:text-slate-400">
-                              <Clock className="h-4 w-4 mr-1" />
-                              <span className="text-sm">{new Date(entry.createdAt).toLocaleTimeString()}</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 flex-1">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <h3 className="text-xl font-semibold">{entry.disease}</h3>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                              onClick={() => handleDelete(entry)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          <div className="mb-3">
-                            <h4 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                              {t("symptoms")}
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {entry.symptoms.map((symptom) => (
-                                <Badge key={symptom} variant="outline">
-                                  {symptom}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="flex gap-2 mt-4">
-                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(entry)}>
-                              <Eye className="mr-2 h-3 w-3" /> {t("symptomHistory.viewDetails")}
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => handlePrintEntry(entry)}>
-                              <Printer className="mr-2 h-3 w-3" /> {t("print")}
-                            </Button>
-                            <Button variant="secondary" size="sm" asChild>
-                              <Link href="/symptom-input">
-                                <RefreshCw className="mr-2 h-3 w-3" /> {t("symptomHistory.recheck")}
-                              </Link>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                symptomHistory.map(renderSymptomCard)
               )}
             </div>
           </TabsContent>

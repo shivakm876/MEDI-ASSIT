@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server"
 import { loadModel, predict } from "@/lib/ml-model"
 
+interface Prediction {
+  disease: string
+  probability: number
+  description: string
+  precautions?: string[]
+  medications?: string[]
+  workouts?: string[]
+  diets?: string[]
+}
+
 export async function POST(req: Request) {
   try {
     const { symptoms } = await req.json()
@@ -16,11 +26,22 @@ export async function POST(req: Request) {
     const processedSymptoms = symptoms.map((s: string) => s.toLowerCase().trim())
 
     // Get prediction from the model
-    const prediction = await predict(processedSymptoms)
+    const predictions = await predict(processedSymptoms) as Prediction[]
 
-    // console.log(prediction)
+    // Format the response to match the new schema
+    const response = {
+      predictions: predictions.map((pred) => ({
+        diseaseName: pred.disease,
+        probability: pred.probability,
+        description: pred.description,
+        precautions: pred.precautions || [],
+        medications: pred.medications || [],
+        workouts: pred.workouts || [],
+        diets: pred.diets || []
+      }))
+    }
 
-    return NextResponse.json(prediction)
+    return NextResponse.json(response)
   } catch (error) {
     console.error("Error analyzing symptoms:", error)
     return NextResponse.json(

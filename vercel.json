@@ -1,0 +1,13 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "functions": {
+    "app/api/disease-prediction/route.ts": {
+      "runtime": "python3.9"
+    }
+  }
+} 

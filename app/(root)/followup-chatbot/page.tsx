@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
+import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -152,27 +153,37 @@ export default function FollowupChatbotPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <Card className="max-w-4xl mx-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="max-w-4xl mx-auto"
+      >
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Medical Assistant Chat</CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleClearChat}
-            className="flex items-center gap-2"
-          >
-            <Trash2 className="h-4 w-4" />
-            Clear Chat
-          </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearChat}
+              className="flex items-center gap-2"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear Chat
+            </Button>
         </CardHeader>
         <CardContent>
           <div
             ref={chatRef}
             className="h-[500px] overflow-y-auto mb-4 space-y-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg"
           >
+              <AnimatePresence>
             {messages.map((message, index) => (
-              <div
+                  <motion.div
                 key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                 className={`flex ${
                   message.role === "user" ? "justify-end" : "justify-start"
                 }`}
@@ -194,10 +205,15 @@ export default function FollowupChatbotPage() {
                     <p className="whitespace-pre-wrap">{message.parts[0].text}</p>
                   )}
                 </div>
-              </div>
+                  </motion.div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex justify-start"
+                  >
                 <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
                   <div className="flex space-x-2">
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
@@ -205,8 +221,9 @@ export default function FollowupChatbotPage() {
                     <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200" />
                   </div>
                 </div>
-              </div>
+                  </motion.div>
             )}
+              </AnimatePresence>
           </div>
 
           <form onSubmit={handleSubmit} className="flex gap-2">
@@ -223,6 +240,7 @@ export default function FollowupChatbotPage() {
           </form>
         </CardContent>
       </Card>
+      </motion.div>
     </div>
   )
 }

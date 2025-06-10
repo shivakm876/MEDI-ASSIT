@@ -47,7 +47,7 @@ export default function AppSidebar() {
         },
         {
           title: "Symptom Checker",
-          url: "/symptom-input",
+          url: "/disease-predictor",
           icon: Stethoscope,
         },
         {
