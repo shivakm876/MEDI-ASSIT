@@ -5,10 +5,45 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, ArrowRight, Stethoscope, Pill, Dumbbell, Utensils, Info, Shield } from "lucide-react"
+import { Loader2, ArrowRight, Stethoscope, Pill, Dumbbell, Utensils, Info, Shield, AlertTriangle } from 'lucide-react'
 import { useToast } from "@/components/ui/use-toast"
 import { MultiSelect } from "@/components/ui/multi-select"
+import { useTheme } from "next-themes"
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
+import { Pie } from "react-chartjs-2"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
+ChartJS.register(ArcElement, Tooltip, Legend)
+
+interface DiseasePrediction {
+  diseaseName: string
+  probability: number
+  description: string
+  precautions: string[]
+  medications: string[]
+  workouts: string[]
+  diets: string[]
+  aiInsights?: {
+    severity: string
+    recommendedActions: string[]
+    lifestyleChanges: string[]
+    warningSigns: string[]
+    followUpRecommendations: string[]
+  }
+}
+
+interface PredictionResult {
+  individual_model_results: {
+    DecisionTree: Record<string, number>
+    NaiveBayes: Record<string, number>
+    RandomForest: Record<string, number>
+  }
+  input_symptoms: string[]
+  iterations_per_model: number
+  predicted_probabilities: Record<string, number>
+  total_predictions: number
+  diseasePredictions: DiseasePrediction[]
+}
 
 const symptoms = [
   { value: "itching", label: "Itching" },
@@ -145,25 +180,14 @@ const symptoms = [
   { value: "yellow_crust_ooze", label: "Yellow Crust Ooze" }
 ]
 
-interface SymptomData {
-  symptoms: string[]
-  timestamp: number
-  predictions: {
-    diseaseName: string
-    probability: number
-    description: string
-    precautions: string[]
-    medications: string[]
-    workouts: string[]
-    diets: string[]
-  }[]
-}
-
 export default function FreeSymptomInput() {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [analysis, setAnalysis] = useState<SymptomData | null>(null)
+  const [results, setResults] = useState<PredictionResult | null>(null)
+  const [selectedDisease, setSelectedDisease] = useState<DiseasePrediction | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()
+  const { theme } = useTheme()
 
   // Load saved data from localStorage on component mount
   useEffect(() => {
@@ -171,9 +195,13 @@ export default function FreeSymptomInput() {
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData)
-        setAnalysis(parsedData)
+        // Validate the structure before setting
+        if (parsedData && typeof parsedData === 'object' && parsedData.predicted_probabilities) {
+          setResults(parsedData)
+        }
       } catch (error) {
         console.error("Error parsing saved data:", error)
+        localStorage.removeItem("freeSymptomAnalysis")
       }
     }
   }, [])
@@ -189,6 +217,8 @@ export default function FreeSymptomInput() {
     }
 
     setIsLoading(true)
+    setError(null)
+    
     try {
       const response = await fetch("/api/free-symptoms", {
         method: "POST",
@@ -198,34 +228,268 @@ export default function FreeSymptomInput() {
         body: JSON.stringify({ symptoms: selectedSymptoms }),
       })
 
-      if (!response.ok) {
-        throw new Error("Failed to analyze symptoms")
-      }
-
       const analysisData = await response.json()
 
-      const data: SymptomData = {
-        symptoms: selectedSymptoms,
-        timestamp: Date.now(),
-        predictions: analysisData.predictions || []
+      if (!response.ok) {
+        throw new Error(analysisData.error || "Failed to analyze symptoms")
       }
 
-      setAnalysis(data)
-      localStorage.setItem("freeSymptomAnalysis", JSON.stringify(data))
+      // Validate the response structure
+      if (!analysisData.predicted_probabilities || typeof analysisData.predicted_probabilities !== 'object') {
+        throw new Error("Invalid response format received")
+      }
+
+      setResults(analysisData)
+      localStorage.setItem("freeSymptomAnalysis", JSON.stringify(analysisData))
       
       toast({
         title: "Analysis Complete",
         description: "Your symptoms have been analyzed successfully",
       })
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to analyze symptoms. Please try again."
+      setError(errorMessage)
       toast({
         title: "Error",
-        description: "Failed to analyze symptoms. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const formatProbability = (prob: number) => {
+    return prob.toFixed(2)
+  }
+
+  const renderModelPredictions = (modelName: string, predictions: Record<string, number>) => {
+    if (!predictions || typeof predictions !== 'object') {
+      return (
+        <div className="text-center text-muted-foreground py-4">
+          No predictions available for {modelName}
+        </div>
+      )
+    }
+
+    const entries = Object.entries(predictions)
+    if (entries.length === 0) {
+      return (
+        <div className="text-center text-muted-foreground py-4">
+          No predictions available for {modelName}
+        </div>
+      )
+    }
+
+    return (
+      <div className="space-y-2">
+        {entries
+          .sort(([, a], [, b]) => b - a)
+          .map(([disease, probability]) => (
+            <div
+              key={`${modelName}-${disease}`}
+              className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded shadow-sm"
+            >
+              <span className="font-medium text-gray-900 dark:text-gray-100">{disease}</span>
+              <span className="text-blue-600 dark:text-blue-400">{formatProbability(probability)}%</span>
+            </div>
+          ))}
+      </div>
+    )
+  }
+
+  const getChartData = () => {
+    if (!results || !results.predicted_probabilities || typeof results.predicted_probabilities !== 'object') {
+      return null
+    }
+
+    const entries = Object.entries(results.predicted_probabilities)
+    if (entries.length === 0) {
+      return null
+    }
+
+    const topPredictions = entries
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+
+    return {
+      labels: topPredictions.map(([disease]) => disease),
+      datasets: [
+        {
+          data: topPredictions.map(([, probability]) => probability),
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.8)",
+            "rgba(54, 162, 235, 0.8)",
+            "rgba(255, 206, 86, 0.8)",
+            "rgba(75, 192, 192, 0.8)",
+            "rgba(153, 102, 255, 0.8)",
+          ],
+          borderColor: [
+            "rgba(255, 99, 132, 1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(153, 102, 255, 1)",
+          ],
+          borderWidth: 1,
+        },
+      ],
+    }
+  }
+
+  const renderDiseaseDetails = (disease: DiseasePrediction) => {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="w-5 h-5" />
+                Description
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">{disease.description}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5" />
+                Precautions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="list-disc list-inside space-y-1">
+                {disease.precautions.map((precaution, index) => (
+                  <li key={index} className="text-muted-foreground">
+                    {precaution}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="medications" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="medications">
+              <Pill className="w-4 h-4 mr-2" />
+              Medications
+            </TabsTrigger>
+            <TabsTrigger value="workouts">
+              <Dumbbell className="w-4 h-4 mr-2" />
+              Workouts
+            </TabsTrigger>
+            <TabsTrigger value="diets">
+              <Utensils className="w-4 h-4 mr-2" />
+              Diets
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="medications">
+            <Card>
+              <CardContent className="pt-6">
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.medications.map((medication, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {medication}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="workouts">
+            <Card>
+              <CardContent className="pt-6">
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.workouts.map((workout, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {workout}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="diets">
+            <Card>
+              <CardContent className="pt-6">
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.diets.map((diet, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {diet}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {disease.aiInsights && (
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Insights</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-semibold mb-2">Severity Level</h4>
+                <p className="text-muted-foreground">{disease.aiInsights.severity}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Recommended Actions</h4>
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.aiInsights.recommendedActions.map((action, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {action}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Lifestyle Changes</h4>
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.aiInsights.lifestyleChanges.map((change, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {change}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Warning Signs</h4>
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.aiInsights.warningSigns.map((sign, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {sign}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-2">Follow-up Recommendations</h4>
+                <ul className="list-disc list-inside space-y-1">
+                  {disease.aiInsights.followUpRecommendations.map((rec, index) => (
+                    <li key={index} className="text-muted-foreground">
+                      {rec}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    )
+  }
+
+  const toggleDiseaseDetails = (disease: DiseasePrediction) => {
+    setSelectedDisease(selectedDisease?.diseaseName === disease.diseaseName ? null : disease)
   }
 
   return (
@@ -249,27 +513,33 @@ export default function FreeSymptomInput() {
             Free Symptom Analysis
           </h1>
           <p className="text-muted-foreground">
-            Select your symptoms below to get a free analysis
+            Select your symptoms to get an instant analysis
           </p>
         </div>
 
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Select Your Symptoms</CardTitle>
-            <CardDescription>
-              Choose from the list of symptoms for better analysis
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="space-y-4">
-              <MultiSelect
-                options={symptoms}
-                value={selectedSymptoms}
-                onChange={setSelectedSymptoms}
-                placeholder="Select symptoms..."
-              />
-              <Button 
-                onClick={analyzeSymptoms} 
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Select Symptoms
+                </label>
+                <MultiSelect
+                  options={symptoms}
+                  value={selectedSymptoms}
+                  onChange={setSelectedSymptoms}
+                  placeholder="Select symptoms..."
+                />
+              </div>
+              <Button
+                onClick={analyzeSymptoms}
                 disabled={isLoading}
                 className="w-full"
               >
@@ -289,76 +559,88 @@ export default function FreeSymptomInput() {
           </CardContent>
         </Card>
 
-        {analysis && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {analysis.predictions.map((prediction, index) => (
-              <Card key={index} className="mb-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Info className="h-5 w-5 text-blue-500" />
-                    {prediction.diseaseName} ({prediction.probability.toFixed(1)}% probability)
-                  </CardTitle>
-                  <CardDescription>{prediction.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="precautions" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
-                      <TabsTrigger value="precautions">Precautions</TabsTrigger>
-                      <TabsTrigger value="medications">Medications</TabsTrigger>
-                      <TabsTrigger value="workouts">Workouts</TabsTrigger>
-                      <TabsTrigger value="diets">Diets</TabsTrigger>
-                    </TabsList>
+        {results && (
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Prediction Results</CardTitle>
+                <CardDescription>
+                  Based on your selected symptoms
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div>
+                    <h3 className="font-semibold mb-4">Top Predictions</h3>
+                    {getChartData() ? (
+                      <div className="w-full max-w-[300px] mx-auto">
+                        <Pie data={getChartData()!} />
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        No prediction data available for chart
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-4">Model Predictions</h3>
+                    <Tabs defaultValue="combined" className="w-full">
+                      <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="combined">Combined</TabsTrigger>
+                        <TabsTrigger value="decisionTree">Decision Tree</TabsTrigger>
+                        <TabsTrigger value="naiveBayes">Naive Bayes</TabsTrigger>
+                        <TabsTrigger value="randomForest">Random Forest</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="combined">
+                        {renderModelPredictions("Combined", results.predicted_probabilities)}
+                      </TabsContent>
+                      <TabsContent value="decisionTree">
+                        {renderModelPredictions("Decision Tree", results.individual_model_results?.DecisionTree || {})}
+                      </TabsContent>
+                      <TabsContent value="naiveBayes">
+                        {renderModelPredictions("Naive Bayes", results.individual_model_results?.NaiveBayes || {})}
+                      </TabsContent>
+                      <TabsContent value="randomForest">
+                        {renderModelPredictions("Random Forest", results.individual_model_results?.RandomForest || {})}
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                    <TabsContent value="precautions">
-                      <ul className="list-disc list-inside space-y-2">
-                        {prediction.precautions.map((precaution, idx) => (
-                          <li key={idx} className="text-muted-foreground">
-                            {precaution}
-                          </li>
-                        ))}
-                      </ul>
-                    </TabsContent>
-
-                    <TabsContent value="medications">
-                      <ul className="list-disc list-inside space-y-2">
-                        {prediction.medications.map((medication, idx) => (
-                          <li key={idx} className="text-muted-foreground">
-                            {medication}
-                          </li>
-                        ))}
-                      </ul>
-                    </TabsContent>
-
-                    <TabsContent value="workouts">
-                      <ul className="list-disc list-inside space-y-2">
-                        {prediction.workouts.map((workout, idx) => (
-                          <li key={idx} className="text-muted-foreground">
-                            {workout}
-                          </li>
-                        ))}
-                      </ul>
-                    </TabsContent>
-
-                    <TabsContent value="diets">
-                      <ul className="list-disc list-inside space-y-2">
-                        {prediction.diets.map((diet, idx) => (
-                          <li key={idx} className="text-muted-foreground">
-                            {diet}
-                          </li>
-                        ))}
-                      </ul>
-                    </TabsContent>
-                  </Tabs>
-                </CardContent>
-              </Card>
-            ))}
-          </motion.div>
+            {results.diseasePredictions && results.diseasePredictions.length > 0 && (
+              <div className="space-y-4">
+                {results.diseasePredictions.map((disease) => (
+                  <Card key={disease.diseaseName}>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle>{disease.diseaseName}</CardTitle>
+                          <CardDescription>
+                            Probability: {formatProbability(disease.probability)}%
+                          </CardDescription>
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => toggleDiseaseDetails(disease)}
+                        >
+                          {selectedDisease?.diseaseName === disease.diseaseName
+                            ? "Hide Details"
+                            : "Show Details"}
+                        </Button>
+                      </div>
+                    </CardHeader>
+                    {selectedDisease?.diseaseName === disease.diseaseName && (
+                      <CardContent>{renderDiseaseDetails(disease)}</CardContent>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </motion.div>
     </div>
   )
-} 
+}
