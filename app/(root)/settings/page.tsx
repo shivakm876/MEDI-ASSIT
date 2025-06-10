@@ -8,16 +8,31 @@ import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Bell, Globe, Lock, Save } from "lucide-react"
+import { Bell, Globe, Lock, Save, Trash2, Eye, EyeOff } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { languages, type Language } from "@/lib/translations"
 import { useToast } from "@/hooks/use-toast"
 import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { signOut } from "next-auth/react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
 
 interface UserPreferences {
-  emailNotifications: boolean
-  pushNotifications: boolean
-  reminderNotifications: boolean
+  // Commenting out notification preferences
+  // emailNotifications: boolean
+  // pushNotifications: boolean
+  // reminderNotifications: boolean
   theme: string
   language: string
   fontSize: string
@@ -29,12 +44,17 @@ export default function SettingsPage() {
   const { data: session } = useSession()
   const { t, language, setLanguage } = useLanguage()
   const { toast } = useToast()
+  const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
+  const [password, setPassword] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
   const [preferences, setPreferences] = useState<UserPreferences>({
-    emailNotifications: true,
-    pushNotifications: true,
-    reminderNotifications: true,
+    // Commenting out notification preferences
+    // emailNotifications: true,
+    // pushNotifications: true,
+    // reminderNotifications: true,
     theme: "system",
     language: "en",
     fontSize: "medium",
@@ -110,6 +130,52 @@ export default function SettingsPage() {
     setPreferences((prev) => ({ ...prev, [key]: value }))
   }
 
+  const handleDeleteAccount = async () => {
+    if (!password) {
+      toast({
+        title: "Error",
+        description: "Please enter your password to confirm account deletion",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsDeleting(true)
+
+    try {
+      const response = await fetch("/api/user/delete-account", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error)
+      }
+
+      toast({
+        title: "Success",
+        description: "Your account has been deleted successfully",
+      })
+
+      // Sign out and redirect to home page
+      await signOut({ callbackUrl: "/" })
+    } catch (error) {
+      console.error("Error deleting account:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete account",
+        variant: "destructive",
+      })
+    } finally {
+      setIsDeleting(false)
+      setPassword("")
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="container max-w-4xl mx-auto px-4 py-8">
@@ -136,10 +202,9 @@ export default function SettingsPage() {
           </div>
 
           <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid grid-cols-3 mb-6">
+            <TabsList className="grid grid-cols-2 mb-6">
               <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="notifications">{t("notifications")}</TabsTrigger>
-              <TabsTrigger value="privacy">{t("privacy")}</TabsTrigger>
+              <TabsTrigger value="account">Account</TabsTrigger>
             </TabsList>
 
             <TabsContent value="general">
@@ -219,127 +284,72 @@ export default function SettingsPage() {
               </Card>
             </TabsContent>
 
-            <TabsContent value="notifications">
+            <TabsContent value="account">
               <Card className="glass-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    {t("notifications")} Settings
+                    <Trash2 className="h-5 w-5 text-destructive" />
+                    Delete Account
                   </CardTitle>
-                  <CardDescription>Manage how you receive notifications</CardDescription>
+                  <CardDescription>
+                    Permanently delete your account and all associated data. This action cannot be undone.
+                  </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="email-notifications">Email {t("notifications")}</Label>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Receive notifications via email</p>
-                    </div>
-                    <Switch
-                      id="email-notifications"
-                      checked={preferences.emailNotifications}
-                      onCheckedChange={(checked) => updatePreference("emailNotifications", checked)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="push-notifications">Push {t("notifications")}</Label>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Receive notifications on your device</p>
-                    </div>
-                    <Switch
-                      id="push-notifications"
-                      checked={preferences.pushNotifications}
-                      onCheckedChange={(checked) => updatePreference("pushNotifications", checked)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="reminder-notifications">Reminder {t("notifications")}</Label>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Receive reminders for health checks</p>
-                    </div>
-                    <Switch
-                      id="reminder-notifications"
-                      checked={preferences.reminderNotifications}
-                      onCheckedChange={(checked) => updatePreference("reminderNotifications", checked)}
-                    />
-                  </div>
+                <CardContent>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full">
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete Account
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your account and remove all your
+                          data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="delete-password">Enter your password to confirm</Label>
+                          <div className="relative">
+                            <Input
+                              id="delete-password"
+                              type={showPassword ? "text" : "password"}
+                              value={password}
+                              onChange={(e) => setPassword(e.target.value)}
+                              placeholder="Enter your password"
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className="h-4 w-4 text-slate-400" />
+                              ) : (
+                                <Eye className="h-4 w-4 text-slate-400" />
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPassword("")}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeleteAccount}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? "Deleting..." : "Delete Account"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </CardContent>
-                <CardFooter>
-                  <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? (
-                      <>Saving...</>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" /> {t("save")} Changes
-                      </>
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="privacy">
-              <Card className="glass-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Lock className="h-5 w-5 text-primary" />
-                    {t("privacy")} Settings
-                  </CardTitle>
-                  <CardDescription>Manage your data and privacy preferences</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="share-data">Share Health Data</Label>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Share anonymized health data to improve our AI models
-                      </p>
-                    </div>
-                    <Switch
-                      id="share-data"
-                      checked={preferences.shareData}
-                      onCheckedChange={(checked) => updatePreference("shareData", checked)}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="anonymous-analytics">Anonymous Analytics</Label>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">
-                        Allow anonymous usage analytics to improve the app
-                      </p>
-                    </div>
-                    <Switch
-                      id="anonymous-analytics"
-                      checked={preferences.anonymousAnalytics}
-                      onCheckedChange={(checked) => updatePreference("anonymousAnalytics", checked)}
-                    />
-                  </div>
-
-                  <div className="space-y-2 pt-4 border-t border-border">
-                    <h3 className="font-medium">Data Management</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                      Manage your personal data stored in our system
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Button variant="outline">{t("download")} My Data</Button>
-                      <Button variant="destructive">{t("delete")} My Account</Button>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? (
-                      <>Saving...</>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" /> {t("save")} Changes
-                      </>
-                    )}
-                  </Button>
-                </CardFooter>
               </Card>
             </TabsContent>
           </Tabs>

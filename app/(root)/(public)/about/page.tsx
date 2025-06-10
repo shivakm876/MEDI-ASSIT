@@ -92,7 +92,7 @@ export default function AboutPage() {
         </Card>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           {stats.map((stat, index) => (
             <motion.div
               key={index}
@@ -106,7 +106,7 @@ export default function AboutPage() {
               </Card>
             </motion.div>
           ))}
-        </div>
+        </div> */}
 
         {/* Features Section */}
         <div className="mb-12">

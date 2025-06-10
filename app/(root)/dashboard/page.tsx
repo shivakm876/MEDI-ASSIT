@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { BookOpen, ChevronRight, MessageCircle, Plus, Stethoscope, User } from "lucide-react"
+import { BookOpen, ChevronRight, MessageCircle, Plus, Stethoscope, User , Search } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -85,7 +85,7 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-4">
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-            <AvatarImage src={session?.user?.image || "/placeholder.svg?height=40&width=40"} alt="User" />
+            {/* <AvatarImage src={session?.user?.image || "/placeholder.svg?height=40&width=40"} alt="User" /> */}
             <AvatarFallback>{session?.user?.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
         </div>
@@ -124,10 +124,10 @@ export default function DashboardPage() {
               </Button>
 
               <Button asChild variant="outline" className="w-full justify-between h-auto py-3">
-                <Link href="/book-chatbot">
+                <Link href="/find-doctors">
                   <div className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    <span className="text-sm sm:text-base">Medical Book Search</span>
+                    <Search className="mr-2 h-4 w-4" />
+                    <span className="text-sm sm:text-base">Find Near by Doctors</span>
                   </div>
                   <ChevronRight className="h-4 w-4" />
                 </Link>

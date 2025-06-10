@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, Camera, Check, Lock, Save, User } from "lucide-react"
+import { Bell, Camera, Check, Lock, Save, User, Eye, EyeOff } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useSession } from "next-auth/react"
+import { useUser } from "@/lib/user-context"
 
 interface UserProfile {
   name: string
@@ -26,6 +27,8 @@ interface UserProfile {
 export default function ProfilePage() {
   const { data: session } = useSession()
   const { toast } = useToast()
+  const { setUserName } = useUser()
+  const [activeTab, setActiveTab] = useState("personal")
   const [profile, setProfile] = useState<UserProfile>({
     name: "",
     email: "",
@@ -33,11 +36,18 @@ export default function ProfilePage() {
     gender: null,
     image: null,
   })
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [pushNotifications, setPushNotifications] = useState(true)
-  const [reminderNotifications, setReminderNotifications] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  })
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  })
 
   useEffect(() => {
     if (session?.user) {
@@ -52,6 +62,7 @@ export default function ProfilePage() {
       if (response.ok) {
         const data = await response.json()
         setProfile(data)
+        setUserName(data.name)
       }
     } catch (error) {
       console.error("Error fetching profile:", error)
@@ -69,10 +80,7 @@ export default function ProfilePage() {
     try {
       const response = await fetch("/api/user/preferences")
       if (response.ok) {
-        const data = await response.json()
-        setEmailNotifications(data.emailNotifications)
-        setPushNotifications(data.pushNotifications)
-        setReminderNotifications(data.reminderNotifications)
+        // Commenting out notification preferences
       }
     } catch (error) {
       console.error("Error fetching preferences:", error)
@@ -96,22 +104,24 @@ export default function ProfilePage() {
         throw new Error("Failed to update profile")
       }
 
-      // Update preferences
-      const preferencesResponse = await fetch("/api/user/preferences", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          emailNotifications,
-          pushNotifications,
-          reminderNotifications,
-        }),
-      })
+      setUserName(profile.name)
 
-      if (!preferencesResponse.ok) {
-        throw new Error("Failed to update preferences")
-      }
+      // Commenting out preferences update
+      // const preferencesResponse = await fetch("/api/user/preferences", {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify({
+      //     emailNotifications,
+      //     pushNotifications,
+      //     reminderNotifications,
+      //   }),
+      // })
+
+      // if (!preferencesResponse.ok) {
+      //   throw new Error("Failed to update preferences")
+      // }
 
       toast({
         title: "Success",
@@ -122,6 +132,76 @@ export default function ProfilePage() {
       toast({
         title: "Error",
         description: "Failed to update profile",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handlePasswordChange = async () => {
+    if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Please fill in all password fields",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords do not match",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (passwords.newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "New password must be at least 6 characters long",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSaving(true)
+
+    try {
+      const response = await fetch("/api/user/change-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: passwords.currentPassword,
+          newPassword: passwords.newPassword,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.text()
+        throw new Error(error)
+      }
+
+      toast({
+        title: "Success",
+        description: "Password updated successfully",
+      })
+
+      // Clear password fields
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      })
+    } catch (error) {
+      console.error("Error changing password:", error)
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update password",
         variant: "destructive",
       })
     } finally {
@@ -152,7 +232,7 @@ export default function ProfilePage() {
           <div className="md:w-1/3">
             <Card className="glass-card border-0">
               <CardContent className="pt-6 flex flex-col items-center">
-                <div className="relative mb-4">
+                {/* <div className="relative mb-4">
                   <Avatar className="h-24 w-24">
                     <AvatarImage src={profile.image || "/placeholder.svg?height=96&width=96"} alt={profile.name} />
                     <AvatarFallback className="text-2xl">
@@ -165,18 +245,28 @@ export default function ProfilePage() {
                   <Button size="icon" variant="secondary" className="absolute bottom-0 right-0 h-8 w-8 rounded-full">
                     <Camera className="h-4 w-4" />
                   </Button>
-                </div>
+                </div> */}
                 <h2 className="text-xl font-bold">{profile.name}</h2>
                 <p className="text-slate-500 dark:text-slate-400">{profile.email}</p>
 
                 <div className="w-full mt-6 space-y-2">
-                  <Button variant="outline" className="w-full justify-start" onClick={() => document.getElementById('personal-tab')?.click()}>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start" 
+                    onClick={() => setActiveTab("personal")}
+                  >
                     <User className="mr-2 h-4 w-4" /> Personal Information
                   </Button>
+                  {/* Commenting out notifications button
                   <Button variant="outline" className="w-full justify-start" onClick={() => document.getElementById('notifications-tab')?.click()}>
                     <Bell className="mr-2 h-4 w-4" /> Notifications
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" onClick={() => document.getElementById('security-tab')?.click()}>
+                  */}
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start" 
+                    onClick={() => setActiveTab("security")}
+                  >
                     <Lock className="mr-2 h-4 w-4" /> Security
                   </Button>
                 </div>
@@ -185,10 +275,12 @@ export default function ProfilePage() {
           </div>
 
           <div className="md:w-2/3">
-            <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid grid-cols-3 mb-4">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid grid-cols-2 mb-4">
                 <TabsTrigger value="personal" id="personal-tab">Personal</TabsTrigger>
+                {/* Commenting out notifications tab
                 <TabsTrigger value="notifications" id="notifications-tab">Notifications</TabsTrigger>
+                */}
                 <TabsTrigger value="security" id="security-tab">Security</TabsTrigger>
               </TabsList>
 
@@ -264,6 +356,7 @@ export default function ProfilePage() {
                 </Card>
               </TabsContent>
 
+              {/* Commenting out notifications tab content
               <TabsContent value="notifications" id="notifications">
                 <Card className="glass-card border-0">
                   <CardHeader>
@@ -324,6 +417,7 @@ export default function ProfilePage() {
                   </CardFooter>
                 </Card>
               </TabsContent>
+              */}
 
               <TabsContent value="security" id="security">
                 <Card className="glass-card border-0">
@@ -334,41 +428,86 @@ export default function ProfilePage() {
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="current-password">Current Password</Label>
-                      <Input id="current-password" type="password" />
+                      <div className="relative">
+                        <Input
+                          id="current-password"
+                          type={showPasswords.current ? "text" : "password"}
+                          value={passwords.currentPassword}
+                          onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                        >
+                          {showPasswords.current ? (
+                            <EyeOff className="h-4 w-4 text-slate-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-slate-400" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="new-password">New Password</Label>
-                      <Input id="new-password" type="password" />
+                      <div className="relative">
+                        <Input
+                          id="new-password"
+                          type={showPasswords.new ? "text" : "password"}
+                          value={passwords.newPassword}
+                          onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                        >
+                          {showPasswords.new ? (
+                            <EyeOff className="h-4 w-4 text-slate-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-slate-400" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="confirm-password">Confirm New Password</Label>
-                      <Input id="confirm-password" type="password" />
-                    </div>
-
-                    <div className="pt-4">
-                      <h3 className="text-sm font-medium mb-2">Two-Factor Authentication</h3>
-                      <div className="flex items-center gap-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-md">
-                        <div className="bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0">
-                          <Check className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Two-factor authentication is enabled</p>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
-                            Your account is secured with two-factor authentication
-                          </p>
-                        </div>
+                      <div className="relative">
+                        <Input
+                          id="confirm-password"
+                          type={showPasswords.confirm ? "text" : "password"}
+                          value={passwords.confirmPassword}
+                          onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                        >
+                          {showPasswords.confirm ? (
+                            <EyeOff className="h-4 w-4 text-slate-400" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-slate-400" />
+                          )}
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
                   <CardFooter>
-                    <Button onClick={handleSave} disabled={isSaving}>
+                    <Button onClick={handlePasswordChange} disabled={isSaving}>
                       {isSaving ? (
                         <>Saving...</>
                       ) : (
                         <>
-                          <Save className="mr-2 h-4 w-4" /> Save Changes
+                          <Save className="mr-2 h-4 w-4" /> Update Password
                         </>
                       )}
                     </Button>

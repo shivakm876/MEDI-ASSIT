@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LogOut, Search, Settings, User, ChevronDown } from "lucide-react"
@@ -13,6 +14,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -21,12 +23,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { LanguageSelector } from "@/components/language-selector"
 import { useLanguage } from "@/lib/language-context"
+import { useSession } from "next-auth/react"
+import { useUser } from "@/lib/user-context"
 
 export default function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
   const { user, isAuthenticated } = useAuth()
   const { t } = useLanguage()
+  const { data: session } = useSession()
+  const { userName } = useUser()
 
   const handleSignOut = () => {
     signOut({ callbackUrl: "/" })
@@ -91,14 +97,8 @@ export default function Header() {
             <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">
               {t("nav.about")}
             </Link>
-            <Link href="/blog" className="text-sm font-medium hover:text-primary transition-colors">
-              {t("nav.blog")}
-            </Link>
-            <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">
-              {t("nav.contact")}
-            </Link>
-            <Link href="/developer" className="text-sm font-medium hover:text-primary transition-colors">
-              {t("nav.developer")}
+            <Link href="/free-input" className="text-sm font-medium hover:text-primary transition-colors">
+              Demo
             </Link>
           </nav>
         )}
@@ -145,16 +145,6 @@ export default function Header() {
                         Symptom History
                       </Link>
                     </CommandItem>
-                    {/* <CommandItem>
-                      <Link href="/appointments" className="flex items-center gap-2 w-full">
-                        Appointments
-                      </Link>
-                    </CommandItem>
-                    <CommandItem>
-                      <Link href="/medications" className="flex items-center gap-2 w-full">
-                        Medications
-                      </Link>
-                    </CommandItem> */}
                     <CommandItem>
                       <Link href="/profile" className="flex items-center gap-2 w-full">
                         Profile
@@ -190,18 +180,18 @@ export default function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2 px-2 h-9">
                   <Avatar className="h-7 w-7">
-                    <AvatarImage
-                      src={user?.image || "/placeholder.svg?height=28&width=28"}
-                      alt={user?.name || "User"}
-                    />
+                    {/* <AvatarImage
+                      src={session?.user?.image || "/placeholder.svg?height=28&width=28"}
+                      alt={userName || session?.user?.name || "User"}
+                    /> */}
                     <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                      {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                      {userName?.[0] || session?.user?.name?.[0] || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden lg:flex flex-col items-start">
-                    <span className="text-sm font-medium leading-none">{user?.name || "User"}</span>
+                    <span className="text-sm font-medium leading-none">{userName || session?.user?.name || "User"}</span>
                     <span className="text-xs text-muted-foreground leading-none mt-0.5">
-                      {user?.email || "user@example.com"}
+                      {session?.user?.email || "user@example.com"}
                     </span>
                   </div>
                   <ChevronDown className="h-3 w-3 hidden lg:block" />
@@ -210,8 +200,8 @@ export default function Header() {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <div className="flex items-center justify-start gap-2 p-2">
                   <div className="flex flex-col space-y-1 leading-none">
-                    {user?.name && <p className="font-medium">{user.name}</p>}
-                    {user?.email && <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>}
+                    <p className="font-medium">{userName || session?.user?.name}</p>
+                    <p className="w-[200px] truncate text-sm text-muted-foreground">{session?.user?.email}</p>
                   </div>
                 </div>
                 <DropdownMenuSeparator />

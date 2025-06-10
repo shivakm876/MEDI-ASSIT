@@ -29,12 +29,16 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { LayoutDashboard, Stethoscope, History, User, Settings, LogOut, ChevronUp, MessageCircle, BookOpen, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useSession } from "next-auth/react"
+import { useUser } from "@/lib/user-context"
 
 export default function AppSidebar() {
   const pathname = usePathname()
   const { user } = useAuth()
   const { t } = useLanguage()
   const { setOpenMobile } = useSidebar()
+  const { data: session } = useSession()
+  const { userName } = useUser()
 
   const navigation = [ 
     {
@@ -60,11 +64,11 @@ export default function AppSidebar() {
           url: "/followup-chatbot",
           icon: MessageCircle,
         },
-        {
-          title: "Medical Search",
-          url: "/book-chatbot",
-          icon: BookOpen,
-        },
+        // {
+        //   title: "Medical Search",
+        //   url: "/book-chatbot",
+        //   icon: BookOpen,
+        // },
         {
           title: "Find Doctors",
           url: "/find-doctors",
@@ -165,17 +169,17 @@ export default function AppSidebar() {
                   className="text-muted-foreground hover:text-card-foreground hover:bg-accent data-[state=open]:bg-accent data-[state=open]:text-card-foreground"
                 >
                   <Avatar className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg border">
-                    <AvatarImage
-                      src={user?.image || "/placeholder.svg?height=32&width=32"}
-                      alt={user?.name || "User"}
-                    />
+                    {/* <AvatarImage
+                      src={session?.user?.image || "/placeholder.svg?height=32&width=32"}
+                      alt={userName || session?.user?.name || "User"}
+                    /> */}
                     <AvatarFallback className="rounded-lg bg-accent text-accent-foreground">
-                      {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                      {userName?.[0] || session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-xs sm:text-sm leading-tight">
-                    <span className="truncate font-semibold text-card-foreground">{user?.name || "User"}</span>
-                    <span className="truncate text-[10px] sm:text-xs text-muted-foreground">{user?.email || "user@example.com"}</span>
+                    <span className="truncate font-semibold text-card-foreground">{userName || session?.user?.name || "User"}</span>
+                    <span className="truncate text-[10px] sm:text-xs text-muted-foreground">{session?.user?.email || "user@example.com"}</span>
                   </div>
                   <ChevronUp className="ml-auto size-3 sm:size-4 text-muted-foreground" />
                 </SidebarMenuButton>
