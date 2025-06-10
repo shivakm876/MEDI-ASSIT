@@ -354,7 +354,7 @@ export default function SymptomHistoryPage() {
             </Select>
 
             <Button asChild>
-              <Link href="/symptom-input">
+              <Link href="/disease-predictor">
                 <Plus className="mr-2 h-4 w-4" /> New Check
               </Link>
             </Button>
@@ -374,7 +374,7 @@ export default function SymptomHistoryPage() {
                   <CardContent className="p-8 text-center">
                     <p className="text-slate-500 dark:text-slate-400 mb-4">{t("symptomHistory.noHistory")}</p>
                     <Button asChild>
-                      <Link href="/symptom-input">
+                      <Link href="/disease-predictor">
                         <Plus className="mr-2 h-4 w-4" /> {t("symptomHistory.checkFirst")}
                       </Link>
                     </Button>

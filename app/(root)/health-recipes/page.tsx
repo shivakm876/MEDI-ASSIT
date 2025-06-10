@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 interface Recipe {
   id: number;
@@ -95,9 +96,11 @@ export default function HealthRecipes() {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => window.location.href = `/health-recipes/${recipe.id}`}
+                  asChild
                 >
-                  View Recipe
+                  <Link href={`/health-recipes/${recipe.id}`}>
+                    View Recipe
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>
