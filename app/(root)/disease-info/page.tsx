@@ -10,9 +10,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface DiseaseInfo {
   description: string
+  elaboratedDescription: string
   precautions: string[]
   medications: string[]
   diets: string[]
+  detailedDietPlan: string
   workouts: string[]
 }
 
@@ -118,7 +120,8 @@ export default function DiseaseInfoPage() {
         // Parse description
         const descriptionRows = parseCSV(descriptionData)
         const descriptionRow = descriptionRows.find((row) => row[0] === selectedDisease)
-        const description = descriptionRow ? descriptionRow.slice(1).join(" ").trim() : "No description available"
+        const description = descriptionRow ? descriptionRow[1].trim() : "No description available"
+        const elaboratedDescription = descriptionRow ? descriptionRow[2].trim() : "No elaborated description available"
 
         // Parse precautions
         const precautionsRows = parseCSV(precautionsData)
@@ -146,19 +149,25 @@ export default function DiseaseInfoPage() {
               .map((d) => d.trim())
               .filter((d) => d && d.length > 0)
           : []
+        const detailedDietPlan = dietsRow ? dietsRow[2].trim() : "No detailed diet plan available"
 
         // Parse workouts
         const workoutsRows = parseCSV(workoutsData)
-        const workouts = workoutsRows
-          .filter((row) => row[2] === selectedDisease)
-          .map((row) => row[3])
-          .filter((w) => w && w.trim().length > 0)
+        const workoutsRow = workoutsRows.find((row) => row[0] === selectedDisease)
+        const workouts = workoutsRow
+          ? workoutsRow[1]
+              .split(" | ")
+              .map((w) => w.trim())
+              .filter((w) => w && w.length > 0)
+          : []
 
         setDiseaseInfo({
           description,
+          elaboratedDescription,
           precautions,
           medications,
           diets,
+          detailedDietPlan,
           workouts,
         })
       } catch (error) {
@@ -242,10 +251,19 @@ export default function DiseaseInfoPage() {
               <CardHeader>
                 <CardTitle>Description</CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground leading-relaxed">
-                  {diseaseInfo.description || "No description available"}
-                </p>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Overview</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {diseaseInfo.description || "No description available"}
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Detailed Description</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {diseaseInfo.elaboratedDescription || "No elaborated description available"}
+                  </p>
+                </div>
               </CardContent>
             </Card>
 
@@ -292,15 +310,26 @@ export default function DiseaseInfoPage() {
                 <CardHeader>
                   <CardTitle>Recommended Diets</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  {diseaseInfo.diets.length > 0 ? (
-                    <ul className="list-disc list-inside space-y-2">
-                      {diseaseInfo.diets.map((diet, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {diet}
-                        </li>
-                      ))}
-                    </ul>
+                <CardContent className="space-y-4">
+                  {diseases.length > 0 ? (
+                    <>
+                      <div>
+                        <h3 className="font-semibold mb-2">Diet Types</h3>
+                        <ul className="list-disc list-inside space-y-2">
+                          {diseaseInfo.diets.map((diet, index) => (
+                            <li key={index} className="text-muted-foreground">
+                              {diet}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold mb-2">Detailed Diet Plan</h3>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {diseaseInfo.detailedDietPlan}
+                        </p>
+                      </div>
+                    </>
                   ) : (
                     <p className="text-muted-foreground">No diet recommendations available</p>
                   )}

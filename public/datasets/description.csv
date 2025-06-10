@@ -1,42 +1,42 @@
-Disease,Description
-Fungal infection,Fungal infection is a common skin condition caused by fungi.
-Allergy,Allergy is an immune system reaction to a substance in the environment.
-GERD,GERD (Gastroesophageal Reflux Disease) is a digestive disorder that affects the lower esophageal sphincter.
-Chronic cholestasis,Chronic cholestasis is a condition where bile flow from the liver is reduced for a prolonged period.
-Drug Reaction,Drug Reaction occurs when the body reacts adversely to a medication.
-Peptic ulcer disease,Peptic ulcer disease involves sores that develop on the inner lining of the stomach and small intestine.
-AIDS,AIDS (Acquired Immunodeficiency Syndrome) is a disease caused by HIV that weakens the immune system.
-Diabetes,Diabetes is a chronic condition that affects how the body processes blood sugar.
-Gastroenteritis,"Gastroenteritis is an inflammation of the stomach and intestines, typically caused by a virus or bacteria."
-Bronchial Asthma,Bronchial Asthma is a respiratory condition characterized by inflammation of the airways.
-Hypertension,"Hypertension, or high blood pressure, is a common cardiovascular condition."
-Migraine,Migraine is a type of headache that often involves severe pain and sensitivity to light and sound.
-Cervical spondylosis,Cervical spondylosis is a degenerative condition of the cervical spine.
-Paralysis (brain hemorrhage),Paralysis (brain hemorrhage) refers to the loss of muscle function due to bleeding in the brain.
-Jaundice,"Jaundice is a yellow discoloration of the skin and eyes, often indicating liver problems."
-Malaria,Malaria is a mosquito-borne infectious disease affecting humans and other animals.
-Chicken pox,Chicken pox is a highly contagious viral infection causing an itchy rash.
-Dengue,Dengue is a mosquito-borne viral infection causing flu-like symptoms.
-Typhoid,Typhoid is a bacterial infection that can lead to a high fever and gastrointestinal symptoms.
-hepatitis A,hepatitis A is a viral liver disease.
-Hepatitis B,Hepatitis B is a viral infection that attacks the liver.
-Hepatitis C,Hepatitis C is a viral infection that causes liver inflammation.
-Hepatitis D,Hepatitis D is a serious liver disease caused by the hepatitis D virus.
-Hepatitis E,Hepatitis E is a viral infection that causes liver inflammation.
-Alcoholic hepatitis,Alcoholic hepatitis is inflammation of the liver due to alcohol consumption.
-Tuberculosis,Tuberculosis is a bacterial infection that primarily affects the lungs.
-Common Cold,Common Cold is a viral infection of the upper respiratory tract.
-Pneumonia,Pneumonia is an inflammatory condition affecting the air sacs in the lungs.
-Dimorphic hemmorhoids(piles),Dimorphic hemmorhoids(piles) is a condition characterized by swollen blood vessels in the rectum.
-Heart attack,Heart attack is a sudden and severe reduction in blood flow to the heart muscle.
-Varicose veins,"Varicose veins are enlarged, twisted veins that usually appear on the legs."
-Hypothyroidism,Hypothyroidism is a condition where the thyroid gland doesn't produce enough thyroid hormone.
-Hyperthyroidism,Hyperthyroidism is a condition where the thyroid gland produces too much thyroid hormone.
-Hypoglycemia,Hypoglycemia is a condition characterized by abnormally low blood sugar levels.
-Osteoarthristis,Osteoarthristis is a degenerative joint disease that affects the cartilage in joints.
-Arthritis,"Arthritis is inflammation of one or more joints, causing pain and stiffness."
-(vertigo) Paroymsal Positional Vertigo,(Vertigo) Paroxysmal Positional Vertigo is a type of dizziness caused by specific head movements.
-Acne,Acne is a skin condition that occurs when hair follicles become clogged with oil and dead skin cells.
-Urinary tract infection,Urinary tract infection is an infection in any part of the urinary system.
-Psoriasis,"Psoriasis is a chronic skin condition characterized by red, itchy, and scaly patches."
-Impetigo,Impetigo is a highly contagious skin infection causing red sores that can break open.
+Disease,Description,Elaborated Description
+Fungal infection,Fungal infection is a common skin condition caused by fungi.,"Fungal infections are caused by fungi that invade the skin, nails, or scalp. They often result in redness, itching, and peeling. Common types include athlete's foot and ringworm."
+Allergy,Allergy is an immune system reaction to a substance in the environment.,"Allergies occur when the immune system reacts to harmless substances. Symptoms may include sneezing, rashes, or difficulty breathing. Common allergens include pollen, dust, and certain foods."
+GERD,GERD (Gastroesophageal Reflux Disease) is a digestive disorder that affects the lower esophageal sphincter.,GERD is a digestive disorder caused by acid reflux. It leads to heartburn and discomfort in the chest. Long-term GERD can damage the esophagus.
+Chronic cholestasis,Chronic cholestasis is a condition where bile flow from the liver is reduced for a prolonged period.,"Chronic cholestasis is a condition where bile flow from the liver is reduced or blocked. It may cause jaundice, itching, and dark urine. It often signals liver or bile duct issues."
+Drug Reaction,Drug Reaction occurs when the body reacts adversely to a medication.,Drug reactions occur when the body responds negatively to medications. Symptoms range from mild rashes to severe allergic responses. Immediate medical attention is sometimes necessary.
+Peptic ulcer disease,Peptic ulcer disease involves sores that develop on the inner lining of the stomach and small intestine.,Peptic ulcers are sores that form in the stomach lining. They are often caused by H. pylori infection or long-term NSAID use. Common symptoms include stomach pain and bloating.
+AIDS,AIDS (Acquired Immunodeficiency Syndrome) is a disease caused by HIV that weakens the immune system.,"AIDS is the final stage of HIV infection. It severely weakens the immune system, increasing vulnerability to infections. There is no cure, but antiretroviral therapy can manage symptoms."
+Diabetes,Diabetes is a chronic condition that affects how the body processes blood sugar.,Diabetes is a chronic condition that affects blood sugar regulation. It results from insulin resistance or lack of insulin. Uncontrolled diabetes can lead to serious health issues.
+Gastroenteritis,"Gastroenteritis is an inflammation of the stomach and intestines, typically caused by a virus or bacteria.","Gastroenteritis is the inflammation of the stomach and intestines. It often causes diarrhea, vomiting, and abdominal cramps. It is usually viral or bacterial in origin."
+Bronchial Asthma,Bronchial Asthma is a respiratory condition characterized by inflammation of the airways.,"Asthma is a respiratory condition causing airway inflammation and narrowing. Symptoms include wheezing, coughing, and breathlessness. It can be triggered by allergens, cold air, or exercise."
+Hypertension,"Hypertension, or high blood pressure, is a common cardiovascular condition.",Hypertension is consistently high blood pressure. It increases the risk of heart disease and stroke. Lifestyle changes and medication help control it.
+Migraine,Migraine is a type of headache that often involves severe pain and sensitivity to light and sound.,"Migraines are intense headaches often accompanied by nausea and sensitivity to light. They can last from hours to days. Triggers include stress, food, and hormonal changes."
+Cervical spondylosis,Cervical spondylosis is a degenerative condition of the cervical spine.,Cervical spondylosis is age-related wear and tear of the neck vertebrae. It may lead to neck pain and stiffness. Severe cases can compress spinal nerves.
+Paralysis (brain hemorrhage),Paralysis (brain hemorrhage) refers to the loss of muscle function due to bleeding in the brain.,Paralysis from brain hemorrhage occurs due to bleeding in the brain that damages nerves. It can cause partial or full loss of movement. Emergency care is crucial.
+Jaundice,"Jaundice is a yellow discoloration of the skin and eyes, often indicating liver problems.",Jaundice is the yellowing of skin and eyes due to high bilirubin levels. It indicates liver dysfunction or bile duct blockage. It often accompanies other liver-related diseases.
+Malaria,Malaria is a mosquito-borne infectious disease affecting humans and other animals.,"Malaria is a mosquito-borne infectious disease. It causes fever, chills, and flu-like symptoms. Prompt treatment is vital to prevent complications."
+Chicken pox,Chicken pox is a highly contagious viral infection causing an itchy rash.,Chickenpox is a contagious viral infection characterized by itchy skin rashes and blisters. It mainly affects children. Vaccination prevents its spread.
+Dengue,Dengue is a mosquito-borne viral infection causing flu-like symptoms.,"Dengue is a viral infection spread by mosquitoes. Symptoms include high fever, rash, and muscle pain. Severe cases may lead to bleeding and organ failure."
+Typhoid,Typhoid is a bacterial infection that can lead to a high fever and gastrointestinal symptoms.,"Typhoid is a bacterial infection transmitted through contaminated food and water. It causes high fever, weakness, and abdominal pain. Antibiotics are the primary treatment."
+hepatitis A,hepatitis A is a viral liver disease.,Hepatitis A is a liver infection caused by consuming contaminated food or water. It usually resolves on its own. Vaccination offers prevention.
+Hepatitis B,Hepatitis B is a viral infection that attacks the liver.,Hepatitis B is a viral infection that attacks the liver and can become chronic. It spreads through blood and body fluids. Vaccination is highly effective.
+Hepatitis C,Hepatitis C is a viral infection that causes liver inflammation.,Hepatitis C is a liver disease caused by the hepatitis C virus. It spreads through blood contact. It often becomes chronic and requires antiviral therapy.
+Hepatitis D,Hepatitis D is a serious liver disease caused by the hepatitis D virus.,Hepatitis D is a liver infection that only occurs in people with Hepatitis B. It worsens liver damage. Co-infection increases disease severity.
+Hepatitis E,Hepatitis E is a viral infection that causes liver inflammation.,"Hepatitis E spreads through contaminated water. It causes liver inflammation and jaundice. It usually resolves on its own, but can be serious in pregnant women."
+Alcoholic hepatitis,Alcoholic hepatitis is inflammation of the liver due to alcohol consumption.,"Alcoholic hepatitis is liver inflammation caused by excessive alcohol intake. Symptoms include jaundice, nausea, and abdominal pain. Continued alcohol use can lead to liver failure."
+Tuberculosis,Tuberculosis is a bacterial infection that primarily affects the lungs.,Tuberculosis (TB) is a bacterial infection affecting the lungs. It spreads through air droplets. It requires long-term antibiotic treatment.
+Common Cold,Common Cold is a viral infection of the upper respiratory tract.,"Common cold is a viral upper respiratory tract infection. Symptoms include sneezing, sore throat, and runny nose. It usually resolves in a few days."
+Pneumonia,Pneumonia is an inflammatory condition affecting the air sacs in the lungs.,"Pneumonia is a lung infection that causes inflammation in the air sacs. It leads to cough, fever, and difficulty breathing. Bacterial pneumonia requires antibiotics."
+Dimorphic hemmorhoids(piles),Dimorphic hemmorhoids(piles) is a condition characterized by swollen blood vessels in the rectum.,"Hemorrhoids are swollen veins in the rectum or anus. They cause discomfort, itching, and bleeding. Treatment includes dietary changes and topical medications."
+Heart attack,Heart attack is a sudden and severe reduction in blood flow to the heart muscle.,"A heart attack occurs when blood flow to the heart is blocked. It causes chest pain, breathlessness, and can be fatal. Immediate medical help is crucial."
+Varicose veins,"Varicose veins are enlarged, twisted veins that usually appear on the legs.","Varicose veins are enlarged, twisted veins usually in the legs. They occur due to weak or damaged vein walls. Symptoms include pain, swelling, and heaviness."
+Hypothyroidism,Hypothyroidism is a condition where the thyroid gland doesn't produce enough thyroid hormone.,"Hypothyroidism is a condition where the thyroid gland underproduces hormones. Symptoms include fatigue, weight gain, and depression. It is treated with hormone replacement therapy."
+Hyperthyroidism,Hyperthyroidism is a condition where the thyroid gland produces too much thyroid hormone.,"Hyperthyroidism is caused by overactive thyroid hormone production. Symptoms include weight loss, irritability, and palpitations. Antithyroid drugs or surgery may be needed."
+Hypoglycemia,Hypoglycemia is a condition characterized by abnormally low blood sugar levels.,"Hypoglycemia is abnormally low blood sugar levels. Symptoms include shaking, confusion, and sweating. It requires immediate intake of sugar or carbs."
+Osteoarthristis,Osteoarthristis is a degenerative joint disease that affects the cartilage in joints.,"Osteoarthritis is a degenerative joint disease causing pain and stiffness. It results from cartilage breakdown. It commonly affects knees, hips, and hands."
+Arthritis,"Arthritis is inflammation of one or more joints, causing pain and stiffness.","Arthritis involves inflammation of one or more joints. It leads to pain, swelling, and reduced motion. Types include rheumatoid arthritis and osteoarthritis."
+(vertigo) Paroymsal Positional Vertigo,(Vertigo) Paroxysmal Positional Vertigo is a type of dizziness caused by specific head movements.,This is a condition causing sudden spinning sensation due to changes in head position. It is caused by inner ear issues. It can be managed through specific exercises.
+Acne,Acne is a skin condition that occurs when hair follicles become clogged with oil and dead skin cells.,"Acne is a skin condition caused by clogged pores, excess oil, and bacteria. It appears as pimples, blackheads, or cysts. Hormonal changes and diet can contribute."
+Urinary tract infection,Urinary tract infection is an infection in any part of the urinary system.,"UTIs are infections in the urinary system, often caused by bacteria. Symptoms include burning sensation while urinating and frequent urges. Antibiotics are used for treatment."
+Psoriasis,"Psoriasis is a chronic skin condition characterized by red, itchy, and scaly patches.","Psoriasis is a chronic autoimmune skin disorder. It causes red, scaly patches on the skin. Triggers include stress, infections, and weather changes."
+Impetigo,Impetigo is a highly contagious skin infection causing red sores that can break open.,Impetigo is a contagious skin infection common in children. It causes red sores that rupture and form honey-colored crusts. It is treated with topical or oral antibiotics.
