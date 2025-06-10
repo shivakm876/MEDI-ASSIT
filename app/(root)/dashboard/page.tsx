@@ -104,7 +104,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="space-y-3 sm:space-y-4">
               <Button asChild variant="outline" className="w-full justify-between h-auto py-3">
-                <Link href="/symptom-input">
+                <Link href="/disease-predictor">
                   <div className="flex items-center">
                     <Stethoscope className="mr-2 h-4 w-4" />
                     <span className="text-sm sm:text-base">Check Symptoms</span>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
               )}
 
               <Button variant="outline" className="w-full h-auto py-3" asChild>
-                <Link href="/symptom-input">
+                <Link href="/disease-predictor">
                   <Plus className="mr-2 h-4 w-4" /> 
                   <span className="text-sm sm:text-base">New Check</span>
                 </Link>

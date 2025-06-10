@@ -36,7 +36,7 @@ export default function Header() {
     switch (pathname) {
       case "/dashboard":
         return t("dashboard")
-      case "/symptom-input":
+      case "/disease-predictor":
         return t("symptomChecker")
       case "/symptom-history":
         return t("symptomHistory")
@@ -136,7 +136,7 @@ export default function Header() {
                       </Link>
                     </CommandItem>
                     <CommandItem>
-                      <Link href="/symptom-input" className="flex items-center gap-2 w-full">
+                      <Link href="/disease-predictor" className="flex items-center gap-2 w-full">
                         Symptom Checker
                       </Link>
                     </CommandItem>
