@@ -27,7 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { LayoutDashboard, Stethoscope, History, User, Settings, LogOut, ChevronUp, MessageCircle, BookOpen, X, Search } from "lucide-react"
+import { LayoutDashboard, Stethoscope, History, User, Settings, LogOut, ChevronUp, MessageCircle, BookOpen, X, Search, Utensils } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 import { useUser } from "@/lib/user-context"
@@ -78,6 +78,11 @@ export default function AppSidebar() {
           title: "Disease Info",
           url: "/disease-info",
           icon: BookOpen,
+        },
+        {
+          title: "Health Recipes",
+          url: "/health-recipes",
+          icon: Utensils,
         },
       ],
     },
