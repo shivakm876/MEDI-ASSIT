@@ -141,7 +141,6 @@ export default function SettingsPage() {
     }
 
     setIsDeleting(true)
-
     try {
       const response = await fetch("/api/user/delete-account", {
         method: "POST",
@@ -151,28 +150,28 @@ export default function SettingsPage() {
         body: JSON.stringify({ password }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        const error = await response.text()
-        throw new Error(error)
+        throw new Error(data.message || "Failed to delete account")
       }
 
       toast({
         title: "Success",
-        description: "Your account has been deleted successfully",
+        description: "Account deleted successfully",
       })
 
       // Sign out and redirect to home page
       await signOut({ callbackUrl: "/" })
-    } catch (error) {
-      console.error("Error deleting account:", error)
+    } catch (error: any) {
+      console.error("Delete account error:", error)
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete account",
+        description: error.message || "Failed to delete account",
         variant: "destructive",
       })
     } finally {
       setIsDeleting(false)
-      setPassword("")
     }
   }
 

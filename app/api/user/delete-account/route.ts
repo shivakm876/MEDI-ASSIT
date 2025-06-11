@@ -34,12 +34,21 @@ export async function POST(req: Request) {
       return new NextResponse("Password is incorrect", { status: 400 })
     }
 
+    // Delete all sessions for this user
+    await prisma.session.deleteMany({
+      where: { userId: session.user.id }
+    })
+
     // Delete user and all associated data
     await prisma.user.delete({
       where: { id: session.user.id },
     })
 
-    return NextResponse.json({ message: "Account deleted successfully" })
+    // Return response with instructions to sign out
+    return NextResponse.json({ 
+      message: "Account deleted successfully",
+      shouldSignOut: true 
+    })
   } catch (error) {
     console.error("[DELETE_ACCOUNT]", error)
     return new NextResponse("Internal error", { status: 500 })

@@ -207,7 +207,7 @@ export default function DashboardPage() {
         transition={{ duration: 0.5, delay: 0.3 }}
         className="mt-4 sm:mt-6"
       >
-        <Card className="glass-card border-0">
+        {/* <Card className="glass-card border-0">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl">Health Insights</CardTitle>
             <CardDescription className="text-sm sm:text-base">Your health trends and recommendations</CardDescription>
@@ -219,7 +219,7 @@ export default function DashboardPage() {
               </p>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </motion.div>
     </div>
   )
