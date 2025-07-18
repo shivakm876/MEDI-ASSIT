@@ -60,6 +60,7 @@
    ```bash
    git clone https://github.com/shivakm876/MEDI-ASSIT.git
    cd MEDI-ASSIT
-  
+### Contributing
+Contributions are welcome! If you have suggestions for improvements or new features, please open an issue or submit a pull request.
 
 
